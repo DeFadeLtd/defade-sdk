@@ -93,6 +93,24 @@ claude mcp add --transport http defade "https://api.defade.org/mcp?api_key=YOUR_
 
 In **Claude** or **ChatGPT**, add a custom connector with the URL above. Tool calls are metered against your key exactly like REST calls. Full instructions: [defade.org/api-docs#mcp](https://defade.org/api-docs#mcp).
 
+### stdio transport (Claude Desktop, local clients)
+
+This package also ships `defade-mcp`, a local stdio MCP server that proxies to the hosted endpoint — for clients that only launch local commands:
+
+```json
+{
+  "mcpServers": {
+    "defade": {
+      "command": "npx",
+      "args": ["-y", "defade-mcp"],
+      "env": { "DEFADE_API_KEY": "df_your_key" }
+    }
+  }
+}
+```
+
+Keyless runs still handshake and list tools; scan tools then reply with instructions to get a key. `DEFADE_MCP_URL` overrides the upstream endpoint for testing.
+
 ## Links
 
 - [API docs](https://defade.org/api-docs) · [get a key](https://defade.org/developers) · [live API self-description](https://api.defade.org/v1)
