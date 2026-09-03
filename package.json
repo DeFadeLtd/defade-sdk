@@ -1,0 +1,53 @@
+{
+  "name": "defade",
+  "version": "0.1.0",
+  "description": "Official SDK for the DeFade API — rug pull risk scores and on-chain forensics (bundles, funding traces, deployer history) for tokens on Solana, Ethereum, Base and Robinhood Chain.",
+  "license": "MIT",
+  "author": "DeFade Ltd (https://defade.org)",
+  "homepage": "https://defade.org/api-docs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DeFadeLtd/defade-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DeFadeLtd/defade-sdk/issues"
+  },
+  "main": "./index.cjs",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.mjs",
+      "require": "./index.cjs"
+    }
+  },
+  "files": [
+    "index.cjs",
+    "index.mjs",
+    "index.d.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test test/client.test.js"
+  },
+  "keywords": [
+    "defade",
+    "rug pull",
+    "rug checker",
+    "solana",
+    "ethereum",
+    "base",
+    "memecoin",
+    "token security",
+    "rug score",
+    "bundle detection",
+    "insider detection",
+    "wallet forensics",
+    "mcp",
+    "crypto security api"
+  ]
+}
