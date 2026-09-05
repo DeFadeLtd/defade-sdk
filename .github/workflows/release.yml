@@ -6,6 +6,14 @@ name: release
 on:
   push:
     tags: ['v*']
+  # Manual fallback for environments that can push branches but not tag refs:
+  # gh release create makes the tag itself when it doesn't exist yet.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (created at main if missing)'
+        required: true
+        default: 'v0.2.0'
 
 permissions:
   contents: write
@@ -19,10 +27,12 @@ jobs:
       - name: Create GitHub Release for the tag
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag || github.ref_name }}
         run: |
-          gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 && {
-            echo "Release $GITHUB_REF_NAME already exists"; exit 0; }
-          gh release create "$GITHUB_REF_NAME" \
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 && {
+            echo "Release $TAG already exists"; exit 0; }
+          gh release create "$TAG" \
             --repo "$GITHUB_REPOSITORY" \
-            --title "$GITHUB_REF_NAME" \
+            --target "$GITHUB_SHA" \
+            --title "$TAG" \
             --generate-notes
