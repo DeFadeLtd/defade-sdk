@@ -16,6 +16,7 @@
 // scan tools then answer with instructions to get a key.
 
 const ENDPOINT = process.env.DEFADE_MCP_URL || 'https://api.defade.org/mcp';
+const VERSION = require('../package.json').version;
 
 let apiKey = process.env.DEFADE_API_KEY || '';
 for (const a of process.argv.slice(2)) {
@@ -45,19 +46,27 @@ async function post(msg) {
 
 const backoff = () => new Promise((r) => setTimeout(r, 500));
 
+// stdout is the protocol channel, so diagnostics go to stderr — hosted
+// runners surface stderr in their log views, which is where these lines
+// are read when a tool call fails in the wild.
+const log = (line) => process.stderr.write(`[defade-mcp v${VERSION}] ${line}\n`);
+
 // Every DeFade tool is read-only and idempotent, so retrying a message once
 // is always safe. Hosted containers (Glama instances and the like) see
 // transient egress failures a laptop never does, and without the retry each
 // one surfaces to the assistant as a failed tool call.
 async function forward(msg) {
+  const what = `${msg.method}${msg.id !== undefined && msg.id !== null ? `#${msg.id}` : ''}`;
   let out;
   try {
     out = await post(msg);
   } catch (e) {
+    log(`${what}: network failure (${e.message}), retrying once`);
     await backoff();
     out = await post(msg); // a second network failure propagates to the caller
   }
   if (RETRYABLE_STATUS.has(out.res.status)) {
+    log(`${what}: gateway HTTP ${out.res.status}, retrying once`);
     await backoff();
     try { out = await post(msg); } catch { /* keep the gateway response we have */ }
   }
@@ -71,6 +80,8 @@ async function forward(msg) {
 function reply(obj) {
   if (obj != null) process.stdout.write(JSON.stringify(obj) + '\n');
 }
+
+log(`started, proxying to ${ENDPOINT} (key: ${apiKey ? 'set' : 'none'})`);
 
 let buffer = '';
 let pending = 0;
@@ -94,6 +105,7 @@ process.stdin.on('data', (chunk) => {
     forward(msg)
       .then((res) => { if (!isNotification) reply(res); })
       .catch((e) => {
+        log(`${msg.method}: giving up after retry (${e.message})`);
         if (!isNotification) {
           reply({ jsonrpc: '2.0', id: msg.id, error: { code: -32603, message: `upstream unreachable: ${e.message}` } });
         }
