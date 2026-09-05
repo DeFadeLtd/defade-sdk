@@ -36,3 +36,20 @@ jobs:
             --target "$GITHUB_SHA" \
             --title "$TAG" \
             --generate-notes
+
+      # Idempotent on purpose: it compares package.json against what npm
+      # serves and publishes only the missing version, so a re-dispatch for
+      # an existing GitHub Release still catches npm up. Skips cleanly while
+      # the NPM_TOKEN repository secret is not configured.
+      - name: Publish to npm when the version is missing there
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          [ -z "$NPM_TOKEN" ] && { echo "NPM_TOKEN secret not set — skipping npm publish"; exit 0; }
+          pkg=$(node -p "require('./package.json').version")
+          live=$(npm view defade version 2>/dev/null || echo none)
+          [ "$live" = "$pkg" ] && { echo "npm already serves defade@$pkg"; exit 0; }
+          node --test test/*.test.js
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+          npm publish
+          echo "published defade@$pkg (npm previously served $live)"
