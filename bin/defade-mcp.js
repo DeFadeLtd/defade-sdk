@@ -30,11 +30,38 @@ for (const a of process.argv.slice(2)) {
   }
 }
 
-async function forward(msg) {
+const TIMEOUT_MS = 150000; // above the remote server's own 120s upstream budget
+const RETRYABLE_STATUS = new Set([502, 503, 504, 522, 524]); // gateway hiccups, not tool errors
+
+async function post(msg) {
   const headers = { 'content-type': 'application/json', accept: 'application/json' };
   if (apiKey) headers['x-api-key'] = apiKey;
-  const res = await fetch(ENDPOINT, { method: 'POST', headers, body: JSON.stringify(msg) });
-  const text = await res.text();
+  const res = await fetch(ENDPOINT, {
+    method: 'POST', headers, body: JSON.stringify(msg),
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  });
+  return { res, text: await res.text() };
+}
+
+const backoff = () => new Promise((r) => setTimeout(r, 500));
+
+// Every DeFade tool is read-only and idempotent, so retrying a message once
+// is always safe. Hosted containers (Glama instances and the like) see
+// transient egress failures a laptop never does, and without the retry each
+// one surfaces to the assistant as a failed tool call.
+async function forward(msg) {
+  let out;
+  try {
+    out = await post(msg);
+  } catch (e) {
+    await backoff();
+    out = await post(msg); // a second network failure propagates to the caller
+  }
+  if (RETRYABLE_STATUS.has(out.res.status)) {
+    await backoff();
+    try { out = await post(msg); } catch { /* keep the gateway response we have */ }
+  }
+  const { res, text } = out;
   if (!text) return null; // accepted notification
   try { return JSON.parse(text); } catch {
     return { jsonrpc: '2.0', id: msg.id ?? null, error: { code: -32603, message: `upstream sent non-JSON (HTTP ${res.status})` } };
