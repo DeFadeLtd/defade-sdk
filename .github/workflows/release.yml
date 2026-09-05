@@ -1,0 +1,28 @@
+name: release
+
+# Publishes a GitHub Release whenever a version tag (v*) is pushed. Directory
+# scanners (npm provenance checks, Glama's "stable releases" signal) look for
+# Releases, not bare tags, so the tag push is turned into one automatically.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create GitHub Release for the tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 && {
+            echo "Release $GITHUB_REF_NAME already exists"; exit 0; }
+          gh release create "$GITHUB_REF_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes
