@@ -3,6 +3,7 @@
 [![npm](https://img.shields.io/npm/v/defade)](https://www.npmjs.com/package/defade)
 [![CI](https://github.com/DeFadeLtd/defade-sdk/actions/workflows/test.yml/badge.svg)](https://github.com/DeFadeLtd/defade-sdk/actions)
 [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+[![defade-sdk MCP server](https://glama.ai/mcp/servers/DeFadeLtd/defade-sdk/badges/score.svg)](https://glama.ai/mcp/servers/DeFadeLtd/defade-sdk)
 
 Official JavaScript/TypeScript client for the [DeFade API](https://defade.org/api-docs) — rug pull risk scores and on-chain behavioral forensics for tokens on **Solana, Ethereum, Base and Robinhood Chain**: launch-block bundle detection, multi-hop funding-origin tracing, deployer history, insider networks, sniper bots, smart-money flow, liquidity verification.
 
