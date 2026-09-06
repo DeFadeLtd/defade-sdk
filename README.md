@@ -43,7 +43,7 @@ const eth = await client.holders('0x6982508145454ce325ddbe47a25d4ec3d2311933', {
 
 ## Endpoints
 
-All token methods take `(address, { chain? })` and return the API's parsed JSON.
+All token methods take `(address, { chain? })` and return the API's parsed JSON. `tokenPrice` also takes `type` — the candle size, which sets how far back the window reaches: `'15m'` (default) ≈ 2.5 days, `'1H'` ≈ 10 days, `'4H'` ≈ 40 days, `'1D'` ≈ up to a year of daily candles.
 
 | Group | Methods |
 |---|---|
@@ -92,7 +92,7 @@ Add it to **Claude Code**:
 claude mcp add --transport http defade "https://api.defade.org/mcp?api_key=YOUR_KEY"
 ```
 
-In **Claude** or **ChatGPT**, add a custom connector with the URL above. Tool calls are metered against your key exactly like REST calls. Full instructions: [defade.org/api-docs#mcp](https://defade.org/api-docs#mcp).
+In **Claude** or **ChatGPT**, add a custom connector with the URL above. Tool calls are metered against your key exactly like REST calls. Every tool takes an `address` and an optional `chain`; `get_token_price` also takes an optional `timeframe` (`1m` … `1D`), so `1D` answers peak, drawdown and price-history questions with up to a year of daily candles. Full instructions: [defade.org/api-docs#mcp](https://defade.org/api-docs#mcp).
 
 ### stdio transport (Claude Desktop, local clients)
 
