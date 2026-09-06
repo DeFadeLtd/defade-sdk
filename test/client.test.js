@@ -41,6 +41,17 @@ test('chain option becomes ?chain=', async () => {
   assert.strictEqual(f.calls[0].url, 'https://api.defade.org/v1/holders/0xabc?chain=base');
 });
 
+test('tokenPrice type option becomes ?type=, alongside chain', async () => {
+  const f = stub(200, {});
+  const c = new DeFade({ apiKey: KEY, fetch: f });
+  await c.tokenPrice(MINT, { type: '1D' });
+  assert.strictEqual(f.calls[0].url, `https://api.defade.org/v1/token-price/${MINT}?type=1D`);
+  await c.tokenPrice('0xabc', { chain: 'base', type: '4H' });
+  assert.strictEqual(f.calls[1].url, 'https://api.defade.org/v1/token-price/0xabc?chain=base&type=4H');
+  await c.tokenPrice(MINT);
+  assert.strictEqual(f.calls[2].url, `https://api.defade.org/v1/token-price/${MINT}`, 'no type means the API picks its default');
+});
+
 test('every wrapped token endpoint builds its documented path', async () => {
   // Method name -> /v1 path segment. This is the SDK's contract with the API;
   // https://api.defade.org/v1 lists the live surface.

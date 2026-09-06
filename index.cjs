@@ -80,12 +80,13 @@ class DeFade {
     return body;
   }
 
-  _token(endpoint, mint, opts) {
+  _token(endpoint, mint, opts, extra) {
     // Validation failures reject rather than throw, so every failure mode of
     // an SDK call arrives through the same promise channel.
     if (!mint) return Promise.reject(new DeFadeError(`${endpoint}: token address is required`, 0, null));
+    const params = { ...(opts && opts.chain ? { chain: opts.chain } : {}), ...(extra || {}) };
     return this.get(`/v1/${endpoint}/${encodeURIComponent(mint)}`,
-      opts && opts.chain ? { chain: opts.chain } : undefined);
+      Object.keys(params).length ? params : undefined);
   }
 
   // --- full scan + scores -------------------------------------------------
@@ -102,7 +103,14 @@ class DeFade {
 
   // --- token state --------------------------------------------------------
 
-  tokenPrice(mint, opts) { return this._token('token-price', mint, opts); }
+  /**
+   * Price, market data and OHLCV candles. `type` picks the candle size and
+   * with it how far back the window reaches: 15m (default) ≈ 2.5 days,
+   * 1H ≈ 10 days, 4H ≈ 40 days, 1D ≈ up to a year of daily candles.
+   */
+  tokenPrice(mint, opts) {
+    return this._token('token-price', mint, opts, opts && opts.type ? { type: opts.type } : undefined);
+  }
   holders(mint, opts) { return this._token('holders', mint, opts); }
   liquidity(mint, opts) { return this._token('liquidity', mint, opts); }
   socials(mint, opts) { return this._token('socials', mint, opts); }

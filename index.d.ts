@@ -17,6 +17,18 @@ export interface TokenCallOptions {
   chain?: Chain;
 }
 
+/** Candle size for tokenPrice(); it also sets how far back the window reaches. */
+export type PriceTimeframe = '1m' | '5m' | '15m' | '30m' | '1H' | '4H' | '1D';
+
+export interface TokenPriceOptions extends TokenCallOptions {
+  /**
+   * Candle size: 1m ≈ last 4 hours, 5m ≈ 20 hours, 15m ≈ 2.5 days (default),
+   * 30m ≈ 5 days, 1H ≈ 10 days, 4H ≈ 40 days, 1D ≈ up to 365 days.
+   * A token younger than the window returns candles from its first trade.
+   */
+  type?: PriceTimeframe;
+}
+
 export declare class DeFadeError extends Error {
   name: 'DeFadeError';
   /** HTTP status, or 0 for network/timeout/client-side failures. */
@@ -44,7 +56,8 @@ export declare class DeFade {
   /** Rug pull probability 0–100 where HIGHER = MORE DANGEROUS. */
   rugScore(mint: string, opts?: TokenCallOptions): Promise<any>;
 
-  tokenPrice(mint: string, opts?: TokenCallOptions): Promise<any>;
+  /** Price, market data and OHLCV candles; `type: '1D'` returns up to a year of daily candles. */
+  tokenPrice(mint: string, opts?: TokenPriceOptions): Promise<any>;
   holders(mint: string, opts?: TokenCallOptions): Promise<any>;
   liquidity(mint: string, opts?: TokenCallOptions): Promise<any>;
   socials(mint: string, opts?: TokenCallOptions): Promise<any>;
