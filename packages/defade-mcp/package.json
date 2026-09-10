@@ -1,7 +1,7 @@
 {
   "name": "defade-mcp",
   "version": "0.3.0",
-  "description": "Runs the DeFade MCP stdio server. Thin alias for the `defade` package, which carries the implementation — `npx defade-mcp` and `npx -p defade defade-mcp` are equivalent.",
+  "description": "Runs the DeFade MCP stdio server. Thin alias for the `defade` package, which carries the implementation \u2014 `npx defade-mcp` and `npx -p defade defade-mcp` are equivalent.",
   "license": "MIT",
   "author": "DeFade Ltd (https://defade.org)",
   "homepage": "https://defade.org/api-docs#mcp",
@@ -21,7 +21,8 @@
   },
   "files": [
     "bin/defade-mcp.js",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "engines": {
     "node": ">=18"
