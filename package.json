@@ -1,6 +1,6 @@
 {
   "name": "defade",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Official SDK for the DeFade API — rug pull risk scores and on-chain forensics (bundles, funding traces, deployer history) for tokens on Solana, Ethereum, Base and Robinhood Chain.",
   "license": "MIT",
   "author": "DeFade Ltd (https://defade.org)",
@@ -22,7 +22,8 @@
       "types": "./index.d.ts",
       "import": "./index.mjs",
       "require": "./index.cjs"
-    }
+    },
+    "./bin/defade-mcp.js": "./bin/defade-mcp.js"
   },
   "files": [
     "bin/defade-mcp.js",
@@ -36,7 +37,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "test": "node --test test/client.test.js test/mcp-proxy.test.js"
+    "test": "node --test test/client.test.js test/mcp-proxy.test.js test/alias-package.test.js"
   },
   "keywords": [
     "defade",
