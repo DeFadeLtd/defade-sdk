@@ -1,0 +1,37 @@
+{
+  "name": "defade-mcp",
+  "version": "0.3.0",
+  "description": "Runs the DeFade MCP stdio server. Thin alias for the `defade` package, which carries the implementation — `npx defade-mcp` and `npx -p defade defade-mcp` are equivalent.",
+  "license": "MIT",
+  "author": "DeFade Ltd (https://defade.org)",
+  "homepage": "https://defade.org/api-docs#mcp",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DeFadeLtd/defade-sdk.git",
+    "directory": "packages/defade-mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/DeFadeLtd/defade-sdk/issues"
+  },
+  "bin": {
+    "defade-mcp": "./bin/defade-mcp.js"
+  },
+  "dependencies": {
+    "defade": "^0.3.0"
+  },
+  "files": [
+    "bin/defade-mcp.js",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "defade",
+    "mcp",
+    "model context protocol",
+    "rug pull",
+    "solana",
+    "token security"
+  ]
+}
