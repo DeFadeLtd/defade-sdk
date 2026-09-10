@@ -110,6 +110,10 @@ This package also ships `defade-mcp`, a local stdio MCP server that proxies to t
 }
 ```
 
+`defade-mcp` is published as its own alias package so that snippet works
+verbatim; `npx -p defade defade-mcp` runs the same binary out of this
+package. Both are released together at matching versions.
+
 Keyless runs still handshake and list tools; scan tools then reply with instructions to get a key. `DEFADE_MCP_URL` overrides the upstream endpoint for testing.
 
 ## Links

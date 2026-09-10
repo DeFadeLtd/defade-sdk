@@ -53,3 +53,20 @@ jobs:
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
           npm publish
           echo "published defade@$pkg (npm previously served $live)"
+
+      # The alias package that owns the `defade-mcp` command name — the name
+      # the README's Claude Desktop snippet and every announcement have told
+      # people to run. Same idempotent shape, and it runs after the SDK
+      # publish because it depends on that exact version line.
+      - name: Publish the defade-mcp alias when the version is missing there
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        working-directory: packages/defade-mcp
+        run: |
+          [ -z "$NPM_TOKEN" ] && { echo "NPM_TOKEN secret not set — skipping npm publish"; exit 0; }
+          pkg=$(node -p "require('./package.json').version")
+          live=$(npm view defade-mcp version 2>/dev/null || echo none)
+          [ "$live" = "$pkg" ] && { echo "npm already serves defade-mcp@$pkg"; exit 0; }
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+          npm publish
+          echo "published defade-mcp@$pkg (npm previously served $live)"
