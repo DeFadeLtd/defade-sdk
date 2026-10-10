@@ -5,7 +5,7 @@
 [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![defade-sdk MCP server](https://glama.ai/mcp/servers/DeFadeLtd/defade-sdk/badges/score.svg)](https://glama.ai/mcp/servers/DeFadeLtd/defade-sdk)
 
-Official JavaScript/TypeScript client for the [DeFade API](https://defade.org/api-docs) — rug pull risk scores and on-chain behavioral forensics for tokens on **Solana, Ethereum, Base and Robinhood Chain**: launch-block bundle detection, multi-hop funding-origin tracing, deployer history, insider networks, sniper bots, smart-money flow, liquidity verification.
+Official JavaScript/TypeScript client for the [DeFade API](https://defade.org/api-docs) — rug pull risk scores and on-chain behavioral forensics for tokens on **Solana, Ethereum, Base, BSC, Robinhood Chain, Arc and Hyperliquid**: launch-block bundle detection, multi-hop funding-origin tracing, deployer history, insider networks, sniper bots, smart-money flow, liquidity verification.
 
 DeFade answers a different question than contract scanners. Not "does this token's code look wrong?" but "did the wallets behind this launch behave like ruggers?" — [99.9% of confirmed Solana rugs had mint authority revoked and 72.9% had locked LP](https://defade.org/blog/state-of-solana-rugs-2026), so token state alone no longer separates safe from staged.
 
@@ -60,7 +60,7 @@ The API describes itself at [`GET https://api.defade.org/v1`](https://api.defade
 
 ## Chains
 
-`solana` (default), `ethereum`, `base`, `robinhood`. Pass `{ chain: 'base' }` on any token method. EVM chains require an All-Chains plan; a few EVM modules that walk funding graphs cost more units than a standard request — [the discovery document](https://api.defade.org/v1) lists which, and [defade.org/developers](https://defade.org/developers) has current pricing.
+`solana` (default), `ethereum`, `base`, `bsc`, `robinhood`, `arc`, `hyperevm` (Hyperliquid). Pass `{ chain: 'base' }` on any token method. Every plan covers every chain; a few EVM modules that walk funding graphs cost more units than a standard request — [the discovery document](https://api.defade.org/v1) lists which, and [defade.org/developers](https://defade.org/developers) has current pricing.
 
 ## Errors
 

@@ -1,5 +1,5 @@
 /** Chain id accepted by every token endpoint. Omitted means "solana". */
-export type Chain = 'solana' | 'ethereum' | 'base' | 'robinhood' | (string & {});
+export type Chain = 'solana' | 'ethereum' | 'base' | 'bsc' | 'robinhood' | 'arc' | 'hyperevm' | (string & {});
 
 export interface DeFadeOptions {
   /** DeFade API key (df_…) — https://defade.org/developers */
