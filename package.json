@@ -37,7 +37,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "test": "node --test test/client.test.js test/mcp-proxy.test.js test/alias-package.test.js"
+    "test": "node --test test/client.test.js test/mcp-proxy.test.js test/alias-package.test.js test/strip-pr-attribution.test.js"
   },
   "keywords": [
     "defade",
