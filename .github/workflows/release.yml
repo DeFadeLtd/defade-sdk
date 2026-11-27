@@ -17,6 +17,15 @@ on:
 
 permissions:
   contents: write
+  # npm trusted publishing: the job proves to npm, by GitHub's OIDC token,
+  # that it is this repository's release.yml. No npm token is stored
+  # anywhere, so none can leak or expire. Each package names this repository
+  # and workflow as its trusted publisher on npmjs.com (package Settings,
+  # Trusted Publisher), allowed to stage only: a version this job uploads
+  # goes live once a maintainer approves it with 2FA (npmjs.com, Staged
+  # Packages), so nobody who can push a tag here can ship to npm alone.
+  # Provenance is attached to every version automatically.
+  id-token: write
 
 jobs:
   release:
@@ -24,6 +33,12 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      # npm stage needs npm 11.15.0 or later; pinned, as it runs with the
+      # publishing identity.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install -g npm@11.21.3 && npm --version
       - name: Create GitHub Release for the tag
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -38,35 +53,26 @@ jobs:
             --generate-notes
 
       # Idempotent on purpose: it compares package.json against what npm
-      # serves and publishes only the missing version, so a re-dispatch for
-      # an existing GitHub Release still catches npm up. Skips cleanly while
-      # the NPM_TOKEN repository secret is not configured.
+      # serves and stages only the missing version, so a re-dispatch for an
+      # existing GitHub Release still catches npm up.
       - name: Publish to npm when the version is missing there
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          [ -z "$NPM_TOKEN" ] && { echo "NPM_TOKEN secret not set — skipping npm publish"; exit 0; }
           pkg=$(node -p "require('./package.json').version")
           live=$(npm view defade version 2>/dev/null || echo none)
           [ "$live" = "$pkg" ] && { echo "npm already serves defade@$pkg"; exit 0; }
           node --test test/*.test.js
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-          npm publish
-          echo "published defade@$pkg (npm previously served $live)"
+          npm stage publish
+          echo "staged defade@$pkg (npm serves $live): approve it on npmjs.com, Staged Packages"
 
       # The alias package that owns the `defade-mcp` command name — the name
       # the README's Claude Desktop snippet and every announcement have told
       # people to run. Same idempotent shape, and it runs after the SDK
       # publish because it depends on that exact version line.
       - name: Publish the defade-mcp alias when the version is missing there
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         working-directory: packages/defade-mcp
         run: |
-          [ -z "$NPM_TOKEN" ] && { echo "NPM_TOKEN secret not set — skipping npm publish"; exit 0; }
           pkg=$(node -p "require('./package.json').version")
           live=$(npm view defade-mcp version 2>/dev/null || echo none)
           [ "$live" = "$pkg" ] && { echo "npm already serves defade-mcp@$pkg"; exit 0; }
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-          npm publish
-          echo "published defade-mcp@$pkg (npm previously served $live)"
+          npm stage publish
+          echo "staged defade-mcp@$pkg (npm serves $live): approve it after defade@$pkg"
