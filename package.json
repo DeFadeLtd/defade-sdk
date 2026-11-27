@@ -1,7 +1,7 @@
 {
   "name": "defade",
   "version": "0.3.0",
-  "description": "Official SDK for the DeFade API — rug pull risk scores and on-chain forensics (bundles, funding traces, deployer history) for tokens on Solana, Ethereum, Base, BSC, Robinhood Chain, Arc and Hyperliquid.",
+  "description": "Official SDK for the DeFade API — rug pull risk scores and on-chain forensics (bundles, funding traces, deployer history) for tokens on Solana, Ethereum, Base, BSC, Robinhood Chain, Arc, Hyperliquid, Monad and Elysium.",
   "license": "MIT",
   "author": "DeFade Ltd (https://defade.org)",
   "homepage": "https://defade.org/api-docs",
