@@ -21,7 +21,10 @@ permissions:
   # that it is this repository's release.yml. No npm token is stored
   # anywhere, so none can leak or expire. Each package names this repository
   # and workflow as its trusted publisher on npmjs.com (package Settings,
-  # Trusted Publisher); provenance is attached to every version automatically.
+  # Trusted Publisher), allowed to stage only: a version this job uploads
+  # goes live once a maintainer approves it with 2FA (npmjs.com, Staged
+  # Packages), so nobody who can push a tag here can ship to npm alone.
+  # Provenance is attached to every version automatically.
   id-token: write
 
 jobs:
@@ -30,10 +33,12 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      # Trusted publishing needs npm 11.5.1 or later; Node 22 ships npm 10.
+      # npm stage needs npm 11.15.0 or later; pinned, as it runs with the
+      # publishing identity.
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - run: npm install -g npm@11.21.3 && npm --version
       - name: Create GitHub Release for the tag
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -48,16 +53,16 @@ jobs:
             --generate-notes
 
       # Idempotent on purpose: it compares package.json against what npm
-      # serves and publishes only the missing version, so a re-dispatch for
-      # an existing GitHub Release still catches npm up.
+      # serves and stages only the missing version, so a re-dispatch for an
+      # existing GitHub Release still catches npm up.
       - name: Publish to npm when the version is missing there
         run: |
           pkg=$(node -p "require('./package.json').version")
           live=$(npm view defade version 2>/dev/null || echo none)
           [ "$live" = "$pkg" ] && { echo "npm already serves defade@$pkg"; exit 0; }
           node --test test/*.test.js
-          npm publish
-          echo "published defade@$pkg (npm previously served $live)"
+          npm stage publish
+          echo "staged defade@$pkg (npm serves $live): approve it on npmjs.com, Staged Packages"
 
       # The alias package that owns the `defade-mcp` command name — the name
       # the README's Claude Desktop snippet and every announcement have told
@@ -69,5 +74,5 @@ jobs:
           pkg=$(node -p "require('./package.json').version")
           live=$(npm view defade-mcp version 2>/dev/null || echo none)
           [ "$live" = "$pkg" ] && { echo "npm already serves defade-mcp@$pkg"; exit 0; }
-          npm publish
-          echo "published defade-mcp@$pkg (npm previously served $live)"
+          npm stage publish
+          echo "staged defade-mcp@$pkg (npm serves $live): approve it after defade@$pkg"
