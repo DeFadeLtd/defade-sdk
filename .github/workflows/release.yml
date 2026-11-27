@@ -17,6 +17,12 @@ on:
 
 permissions:
   contents: write
+  # npm trusted publishing: the job proves to npm, by GitHub's OIDC token,
+  # that it is this repository's release.yml. No npm token is stored
+  # anywhere, so none can leak or expire. Each package names this repository
+  # and workflow as its trusted publisher on npmjs.com (package Settings,
+  # Trusted Publisher); provenance is attached to every version automatically.
+  id-token: write
 
 jobs:
   release:
@@ -24,6 +30,10 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      # Trusted publishing needs npm 11.5.1 or later; Node 22 ships npm 10.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
       - name: Create GitHub Release for the tag
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -39,18 +49,13 @@ jobs:
 
       # Idempotent on purpose: it compares package.json against what npm
       # serves and publishes only the missing version, so a re-dispatch for
-      # an existing GitHub Release still catches npm up. Skips cleanly while
-      # the NPM_TOKEN repository secret is not configured.
+      # an existing GitHub Release still catches npm up.
       - name: Publish to npm when the version is missing there
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          [ -z "$NPM_TOKEN" ] && { echo "NPM_TOKEN secret not set — skipping npm publish"; exit 0; }
           pkg=$(node -p "require('./package.json').version")
           live=$(npm view defade version 2>/dev/null || echo none)
           [ "$live" = "$pkg" ] && { echo "npm already serves defade@$pkg"; exit 0; }
           node --test test/*.test.js
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
           npm publish
           echo "published defade@$pkg (npm previously served $live)"
 
@@ -59,14 +64,10 @@ jobs:
       # people to run. Same idempotent shape, and it runs after the SDK
       # publish because it depends on that exact version line.
       - name: Publish the defade-mcp alias when the version is missing there
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         working-directory: packages/defade-mcp
         run: |
-          [ -z "$NPM_TOKEN" ] && { echo "NPM_TOKEN secret not set — skipping npm publish"; exit 0; }
           pkg=$(node -p "require('./package.json').version")
           live=$(npm view defade-mcp version 2>/dev/null || echo none)
           [ "$live" = "$pkg" ] && { echo "npm already serves defade-mcp@$pkg"; exit 0; }
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
           npm publish
           echo "published defade-mcp@$pkg (npm previously served $live)"
